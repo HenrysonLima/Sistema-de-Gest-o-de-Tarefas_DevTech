@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
 --
--- Host: localhost    Database: devTech_database
+-- Host: localhost    Database: devtech_database
 -- ------------------------------------------------------
 -- Server version	5.5.5-10.4.32-MariaDB
 
@@ -94,6 +94,36 @@ LOCK TABLES `t_rel_utilizador_grupo` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `t_reuniao`
+--
+
+DROP TABLE IF EXISTS `t_reuniao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `t_reuniao` (
+  `id_reuniao` int(11) NOT NULL AUTO_INCREMENT,
+  `horario_reuniao` time NOT NULL,
+  `data_reuniao` date NOT NULL,
+  `id_grupo` int(11) DEFAULT NULL,
+  `id_admin` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id_reuniao`),
+  KEY `t_reuniao_t_grupo_FK` (`id_grupo`),
+  KEY `t_reuniao_t_admin_FK` (`id_admin`),
+  CONSTRAINT `t_reuniao_t_admin_FK` FOREIGN KEY (`id_admin`) REFERENCES `t_admin` (`id_admin`),
+  CONSTRAINT `t_reuniao_t_grupo_FK` FOREIGN KEY (`id_grupo`) REFERENCES `t_grupo` (`id_grupo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `t_reuniao`
+--
+
+LOCK TABLES `t_reuniao` WRITE;
+/*!40000 ALTER TABLE `t_reuniao` DISABLE KEYS */;
+/*!40000 ALTER TABLE `t_reuniao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `t_tarefa`
 --
 
@@ -144,7 +174,7 @@ LOCK TABLES `t_utilizador` WRITE;
 UNLOCK TABLES;
 
 --
--- Dumping routines for database 'devTech_database'
+-- Dumping routines for database 'devtech_database'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -156,4 +186,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-03 19:24:54
+-- Dump completed on 2025-06-06 22:17:19
