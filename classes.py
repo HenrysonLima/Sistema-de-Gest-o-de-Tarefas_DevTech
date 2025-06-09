@@ -1,4 +1,5 @@
 import mysql.connector
+from datetime import date 
 
 mydb = mysql.connector.connect(
     host = "localhost",
@@ -16,13 +17,24 @@ class Utilizador:
         self.nome = nome
         self.turno = turno
 
-    def teste(self):
-        return "Meu nome é", self.nome, "e o meu turno é", self.turno
+    def mostrarDadosUtilizador(self):
+        return f"Nome:{self.nome} | Turno: {self.turno}"
+    
+    def verDescricaoTarefa(self, tarefa):
+        return tarefa.descricao
+    
+    def mudarEstadoTarefa(self, tarefa, novoEstado):
+        estadosValidos = ['Aberto','Pendente','Fechado']
+        if novoEstado.lower() in estadosValidos:
+            tarefa.estado = novoEstado.lower()
+        else:
+            raise ValueError("Estado inválido. Os únicos estados são: 'Aberto, 'Pendente' ou 'Fechado'.")
         
-
-objeto = Utilizador("Nicole", "Noite")
-
-print(objeto.teste())
+    def atribuirDataFimTarefa(self, tarefa, data_fim):
+        if isinstance(data_fim, date):
+            tarefa.data_fim = data_fim
+        else:
+            raise TypeError("Erro: O valor introduzido não é uma data válida. Tem de ser ano/mês/dia!")
 
 
 """Classe Tarefa"""
