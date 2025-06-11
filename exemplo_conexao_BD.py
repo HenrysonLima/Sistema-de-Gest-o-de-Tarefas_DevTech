@@ -1,10 +1,10 @@
-import mysql.connector 
+import pymysql
 
-mydb = mysql.connector.connect(
+mydb = pymysql.connect(
     host = "localhost",
     user = "root",
     password = "",
-    database = "devtech_database" # nome da base de dados
+    database = "fitlife_db" # nome da base de dados
 )
 
 myscursor = mydb.cursor()
@@ -12,5 +12,5 @@ myscursor = mydb.cursor()
 myscursor.execute("select * from clientes where id_cliente = 1") # query para ser aplicada na base de dados
 
 myresult = myscursor.fetchall()
-nome = myresult
-print(f"O nome é {nome}")
+resultadoDaQuery = myresult
+print(f"Informações achadas do cliente: {resultadoDaQuery}")

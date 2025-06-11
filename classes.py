@@ -1,11 +1,11 @@
-import mysql.connector
+import pymysql
 from datetime import date 
 
-mydb = mysql.connector.connect(
+mydb = pymysql.connect(
     host = "localhost",
     user = "root",
     password = "",
-    database = "devtech_database"
+    database = "devtech_database",
 )
 myscursor  = mydb.cursor()
 
@@ -52,3 +52,4 @@ class Tarefa:
 
         self.data_inicio = data_inicio
         self.data_fim = data_fim
+
