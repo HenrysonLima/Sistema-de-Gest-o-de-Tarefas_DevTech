@@ -59,7 +59,8 @@ class Utilizador:
 """Classe Tarefa"""
 
 class Tarefa:
-    def __init__(self, descricao, estado, data_inicio, data_fim):
+    def __init__(self, id, descricao, estado, data_inicio, data_fim):
+        self.id = id
         self.descricao = descricao
 
         if estado in ['aberto', 'pendente', 'fechado']:
@@ -67,8 +68,52 @@ class Tarefa:
     
         else:
             print("Estado inválido, por favor insira de novo.")
-            return
+            self.estado = "aberto"
 
         self.data_inicio = data_inicio
         self.data_fim = data_fim
+    
+    def guardar_baseDados(self):
+        sql = """
+            INSERT INTO tarefas (descricao, estado, data_inicio, data_fim)
+            VALUES (%s, %s, %s, %s)
+        """
+        valores = (self.descricao, self.estado, self.data_inicio, self.data_fim)
+        myscursor.execute(sql, valores)
+        mydb.commit()
 
+    def alterar_dados(self, nova_descricao, novo_estado, nova_data_inicio, nova_data_fim):
+        if novo_estado in ['aberto','pendente','fechado']:
+            sql = """
+                UPDATE tarefas
+                SET descricao = %s, estado = %s, data_inicio = %s, data_fim = %s
+                WHERE id = %s
+            """
+            valores = (nova_descricao, novo_estado, nova_data_inicio, nova_data_fim, self.id)
+            myscursor.execute(sql, valores)
+            mydb.commit()
+
+            self.descricao = nova_descricao
+            self.estado = novo_estado
+            self.data_inicio = nova_data_inicio
+            self.data_fim = nova_data_fim
+
+            print("Dados alterados com sucesso")
+        else: 
+            print("Estado inválido. Alteração cancelada.")
+            return
+
+from datetime import date
+
+# Criar uma tarefa válida
+t1 = Tarefa(
+    id=None,  # id pode ser None se for autogerado pelo banco
+    descricao="Concluir relatório mensal",
+    estado="aberto",
+    data_inicio=date(2025, 6, 17),
+    data_fim=date(2025, 6, 20)
+)
+
+# Guardar na base de dados
+t1.guardar_baseDados()
+print("Tarefa guardada.")
