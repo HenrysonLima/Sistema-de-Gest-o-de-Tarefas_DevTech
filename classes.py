@@ -7,7 +7,8 @@ mydb = pymysql.connect(
     password = "",
     database = "devtech_database",
 )
-myscursor  = mydb.cursor()
+
+mycursor = mydb.cursor()
 
 """ Class Utilizador"""
 
@@ -35,6 +36,24 @@ class Utilizador:
             tarefa.data_fim = data_fim
         else:
             raise TypeError("Erro: O valor introduzido não é uma data válida. Tem de ser ano/mês/dia!")
+
+    def guardar_baseDados(self):
+        conexao = ligar_base_dados()
+        if conexao:
+            # inicia 
+            try: 
+                cursor = mydb.cursor()
+                sql = "INSERT INTO utilizadores (nome, turno) VALUES  (%s, %s)"
+                valores = ( self.nome, self.turno)
+                cursor.execute(sql, valores)
+                mydb.commit()
+                cursor.close()
+                print("Utilizador guardado com sucesso na base de dados.")
+                #usamos o except caso o codigo dê erro
+                #MySQLError vem da biblioteca mymsql e é utilizada quando dá erros específicos da base de dados
+                # pymysql.MySQLError é o mesmo que fazer from pymysql.err import MySQLError mas depois no except ficaria só except MySQLError as erro 
+                except pymysql.MySQLError as erro:
+                    print(f"Erro ao guardar utilizador: {erro}")
 
 
 """Classe Tarefa"""
