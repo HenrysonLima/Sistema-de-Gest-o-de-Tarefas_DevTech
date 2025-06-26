@@ -117,3 +117,28 @@ t1 = Tarefa(
 # Guardar na base de dados
 t1.guardar_baseDados()
 print("Tarefa guardada.")
+
+
+"""Classe admin"""
+
+class admin:
+    def __init__(self, username, email):
+        self.username = username
+        self.email = email
+        self.privileges = ["add user", "delete user", "ban user"]
+        
+    def display_info(self):
+        print(f"Admin Username: {self.username}")
+        print(f"Email: {self.email}")
+
+    def show_privileges(self):
+        print(f"{self.username}'s privileges:")
+        for privileges in self.privileges:
+            print(f"-{privileges}")
+
+    def add_privileges(self, privilege):
+        if privilege not in self.privileges:
+            self.privileges.append(privilege)
+            print(f"Privilege '{privilege}' removed.")
+        else:
+            print(f"Privilege '{privilege}' not foud.")
