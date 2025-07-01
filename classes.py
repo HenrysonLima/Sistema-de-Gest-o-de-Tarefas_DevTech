@@ -121,47 +121,71 @@ print("Tarefa guardada.")
 
 """Classe admin"""
 
-class Admin:
-    def __init__(self, nome):
-        self.nome = nome
-        self.usuarios = {}  
-        self.configuracoes = {}
+class admin:
+    def __init__(self, username, email):
+        self.username = username
+        self.email = email
+        self.privileges = ["add user", "delete user", "ban user"]
+        
+    def display_info(self):
+        print(f"Admin Username: {self.username}")
+        print(f"Email: {self.email}")
 
-    def criar_usuario(self, usuario_id, nome_usuario):
-        if usuario_id in self.usuarios:
-            print("Usuário já existe.")
+    def show_privileges(self):
+        print(f"{self.username}'s privileges:")
+        for privileges in self.privileges:
+            print(f"-{privileges}")
+
+    def add_privileges(self, privilege):
+        if privilege not in self.privileges:
+            self.privileges.append(privilege)
+            print(f"Privilege '{privilege}' removed.")
         else:
-            self.usuarios[usuario_id] = nome_usuario
-            print(f"Usuário '{nome_usuario}' criado com sucesso.")
+            print(f"Privilege '{privilege}' not foud.")
 
-    def remover_usuario(self, usuario_id):
-        if usuario_id in self.usuarios:
-            nome = self.usuarios.pop(usuario_id)
-            print(f"Usuário '{nome}' removido.")
-        else:
-            print("Usuário não encontrado.")
 
-    def listar_usuarios(self):
-        if not self.usuarios:
-            print("Nenhum usuário cadastrado.")
-        else:
-            print("Lista de usuários:")
-            for uid, nome in self.usuarios.items():
-                print(f"ID: {uid}, Nome: {nome}")
+"""Classe Grupo"""
 
-    def alterar_configuracao(self, chave, valor):
-        self.configuracoes[chave] = valor
-        print(f"Configuração '{chave}' alterada para '{valor}'.")
+class Grupo:
+    def __init__(self, turno, membros, tarefa_atual):
+        self.turno = turno
+        self.membros = membros
+        self.tarefa_atual = tarefa_atual
+    
+    def carregar_do_banco(self, conn):
+        with conn.cursor() as cursor:
+            # Carrega turno e tarefa_atual do grupo
+            cursor.execute("SELECT turno, tarefa_atual FROM grupo WHERE id = %s", (self.id_grupo,))
+            row = cursor.fetchone()
+            if row:
+                self.turno, self.tarefa_atual = row
 
-    def ver_configuracoes(self):
-        if not self.configuracoes:
-            print("Nenhuma configuração definida.")
-        else:
-            print("Configurações atuais:")
-            for chave, valor in self.configuracoes.items():
-                print(f"{chave}: {valor}")
+            cursor.execute("SELECT id_utilizador FROM rel_grupo_utilizadorComum WHERE id_grupo = %s", (self.id_grupo,))
+            self.membros = [r[0] for r in cursor.fetchall()]
+    
+    def salvar_no_banco(self, conn):
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE grupo SET turno = %s, tarefa_atual = %s WHERE id = %s",
+                (self.turno, self.tarefa_atual, self.id_grupo)
+            )
 
-    def gerar_relatorio_usuarios(self):
-        print(f"Relatório de usuários ({len(self.usuarios)} total):")
-        for uid, nome in self.usuarios.items():
-            print(f"ID: {uid}, Nome: {nome}")
+            cursor.execute("DELETE FROM rel_grupo_utilizadorComum WHERE id_grupo = %s", (self.id_grupo,))
+
+            for id_membro in self.membros:
+                cursor.execute(
+                    "INSERT INTO rel_grupo_utilizadorComum (id_grupo, id_utilizador) VALUES (%s, %s)",
+                    (self.id_grupo, id_membro)
+                )
+
+        conn.commit()
+    
+    def adicionar_membro(self, id_membro):
+        if id_membro not in self.membros:
+            self.membros.append(id_membro)
+    
+    def remover_membro(self, id_membro):
+        if id_membro in self.membros:
+            self.membros.remove(id_membro)
+
+
