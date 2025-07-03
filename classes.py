@@ -117,29 +117,7 @@ t1 = Tarefa(
 t1.guardar_baseDados()
 print("Tarefa guardada.")
 
-"""Classe admin"""
 
-class admin:
-    def __init__(self, username, email):
-        self.username = username
-        self.email = email
-        self.privileges = ["add user", "delete user", "ban user"]
-        
-    def display_info(self):
-        print(f"Admin Username: {self.username}")
-        print(f"Email: {self.email}")
-
-    def show_privileges(self):
-        print(f"{self.username}'s privileges:")
-        for privileges in self.privileges:
-            print(f"-{privileges}")
-
-    def add_privileges(self, privilege):
-        if privilege not in self.privileges:
-            self.privileges.append(privilege)
-            print(f"Privilege '{privilege}' removed.")
-        else:
-            print(f"Privilege '{privilege}' not foud.")
 
 
 
@@ -210,3 +188,50 @@ usuario2 = Utilizador("Tiago" , "Noite")
 #Lista de membros teste
 testeMembros = [usuario1.nome , usuario2.nome] 
 print(testeMembros)
+
+
+
+class Admin:
+    def __init__(self, nome):
+        self.nome = nome
+        self.usuarios = {}  
+        self.configuracoes = {}
+
+    def criar_usuario(self, usuario_id, nome_usuario):
+        if usuario_id in self.usuarios:
+            print("Usuário já existe.")
+        else:
+            self.usuarios[usuario_id] = nome_usuario
+            print(f"Usuário '{nome_usuario}' criado com sucesso.")
+
+    def remover_usuario(self, usuario_id):
+        if usuario_id in self.usuarios:
+            nome = self.usuarios.pop(usuario_id)
+            print(f"Usuário '{nome}' removido.")
+        else:
+            print("Usuário não encontrado.")
+
+    def listar_usuarios(self):
+        if not self.usuarios:
+            print("Nenhum usuário cadastrado.")
+        else:
+            print("Lista de usuários:")
+            for uid, nome in self.usuarios.items():
+                print(f"ID: {uid}, Nome: {nome}")
+
+    def alterar_configuracao(self, chave, valor):
+        self.configuracoes[chave] = valor
+        print(f"Configuração '{chave}' alterada para '{valor}'.")
+
+    def ver_configuracoes(self):
+        if not self.configuracoes:
+            print("Nenhuma configuração definida.")
+        else:
+            print("Configurações atuais:")
+            for chave, valor in self.configuracoes.items():
+                print(f"{chave}: {valor}")
+
+    def gerar_relatorio_usuarios(self):
+        print(f"Relatório de usuários ({len(self.usuarios)} total):")
+        for uid, nome in self.usuarios.items():
+            print(f"ID: {uid}, Nome: {nome}")
