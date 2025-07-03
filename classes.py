@@ -52,7 +52,7 @@ class Utilizador:
                 #usamos o except caso o codigo dê erro
                 #MySQLError vem da biblioteca mymsql e é utilizada quando dá erros específicos da base de dados
                 # pymysql.MySQLError é o mesmo que fazer from pymysql.err import MySQLError mas depois no except ficaria só except MySQLError as erro 
-                except pymysql.MySQLError as erro:
+            except pymysql.MySQLError as erro:
                     print(f"Erro ao guardar utilizador: {erro}")
 
 
@@ -72,7 +72,7 @@ class Tarefa:
 
         self.data_inicio = data_inicio
         self.data_fim = data_fim
-    
+
     def guardar_baseDados(self):
         sql = """
             INSERT INTO tarefas (descricao, estado, data_inicio, data_fim)
@@ -103,7 +103,6 @@ class Tarefa:
             print("Estado inválido. Alteração cancelada.")
             return
 
-from datetime import date
 
 # Criar uma tarefa válida
 t1 = Tarefa(
@@ -117,7 +116,6 @@ t1 = Tarefa(
 # Guardar na base de dados
 t1.guardar_baseDados()
 print("Tarefa guardada.")
-
 
 """Classe admin"""
 
@@ -142,6 +140,7 @@ class admin:
             print(f"Privilege '{privilege}' removed.")
         else:
             print(f"Privilege '{privilege}' not foud.")
+
 
 
 """Classe Grupo"""
@@ -189,3 +188,25 @@ class Grupo:
             self.membros.remove(id_membro)
 
 
+"""Classe Reuniao"""
+#construtor da classe recebe uma string, que vai ser a função que retorna o nome do admin, membros e topicos falados
+#função para gerar o txt com o relatorio da reuniao
+class Reuniao:
+    def __init__(self, dataDaReuniao, teamLeader, membros, topicosFalados):
+        self.dataDaReuniao = dataDaReuniao
+        self.teamLeader = teamLeader
+        self.membros = membros
+        self.topicosFalados = topicosFalados
+    
+    def imprimirMembros(self):
+        for i in self.membros:
+            print(i)
+ 
+
+#objetos da classe utilizador
+usuario1 = Utilizador("Pietro" , "Noite")
+usuario2 = Utilizador("Tiago" , "Noite")
+
+#Lista de membros teste
+testeMembros = [usuario1.nome , usuario2.nome] 
+print(testeMembros)
