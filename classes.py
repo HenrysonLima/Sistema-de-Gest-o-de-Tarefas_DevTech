@@ -1,7 +1,8 @@
-import pymysql
+import mysql.connector
+from mysql.connector import Error # o error server para apanhar os erros específicos da base de dados
 from datetime import date 
 
-mydb = pymysql.connect(
+mydb = mysql.connector.connect(
     host = "localhost",
     user = "root",
     password = "",
@@ -13,17 +14,21 @@ mycursor = mydb.cursor()
 """ Class Utilizador"""
 
 class Utilizador:
-    
-    def __init__(self, nome, turno):
+    #construtor
+    def __init__(self, nome, password, turno):
         self.nome = nome
-        self.turno = turno
+        self.password = password
+        self.turno = turno 
 
+    # método que vai mostrar os dados do utilizador
     def mostrarDadosUtilizador(self):
         return f"Nome:{self.nome} | Turno: {self.turno}"
     
+    # método que vai mostrar a descriçãso da tarefa 
     def verDescricaoTarefa(self, tarefa):
         return tarefa.descricao
-    
+
+    # método para mudar o estado da tarefa que o utilizador está a fazer 
     def mudarEstadoTarefa(self, tarefa, novoEstado):
         estadosValidos = ['Aberto','Pendente','Fechado']
         if novoEstado.lower() in estadosValidos:
@@ -31,96 +36,97 @@ class Utilizador:
         else:
             raise ValueError("Estado inválido. Os únicos estados são: 'Aberto, 'Pendente' ou 'Fechado'.")
         
-    def atribuirDataFimTarefa(self, tarefa, data_fim):
-        if isinstance(data_fim, date):
-            tarefa.data_fim = data_fim
-        else:
-            raise TypeError("Erro: O valor introduzido não é uma data válida. Tem de ser ano/mês/dia!")
-
+    # método para guardar os dados do utilizador na base de dados
     def guardar_baseDados(self):
-        conexao = ligar_base_dados()
-        if conexao:
-            # inicia 
-            try: 
-                cursor = mydb.cursor()
-                sql = "INSERT INTO utilizadores (nome, turno) VALUES  (%s, %s)"
-                valores = ( self.nome, self.turno)
-                cursor.execute(sql, valores)
-                mydb.commit()
-                cursor.close()
-                print("Utilizador guardado com sucesso na base de dados.")
-                #usamos o except caso o codigo dê erro
-                #MySQLError vem da biblioteca mymsql e é utilizada quando dá erros específicos da base de dados
-                # pymysql.MySQLError é o mesmo que fazer from pymysql.err import MySQLError mas depois no except ficaria só except MySQLError as erro 
-            except pymysql.MySQLError as erro:
-                    print(f"Erro ao guardar utilizador: {erro}")
+            # vão começar vazios
+            conexao = None
+            cursor = None
+            try:
+                conexao = mysql.connector.connect(
+                    host = "localhost",
+                    user = "root",
+                    password = "",
+                    database = "devtech_database",
+                )
+                #is_connected vai verificar se esta connectado com a base de dados
+                if conexao.is_connected():
+                    cursor = conexao.cursor() # o cursor vai enviar comandos sql para executar na base de dados    
+                    sql = "INSERT INTO t_utilizador(username_utilizador, password_utilizador) VALUES (%s, %s)" # o %s vai ser substituido pelos valores
+                    valores = (self.nome, self.turno)
+                    cursor.execute(sql, valores) # o cursor vai executar o comando que a variavel sql fez e vai ser alterado pelos valores da variavel valores
+                    conexao.commit() # o commit é para confirmar que os dados foram alterados na base de dados
+                    print("Utilizador adicionado com sucesso na base de dados.")
+            # Se alguma parte do try der erro ele vai buscar e vai mandar uma mensagem de erro com o erro identificado
+            #caso o programa crache ele meio que vai ajudar a perceber de onde vem o erri
+            except Error as erro: # 
+                # vai enviar a mensagem com o erro 
+                print("Erro ao guardar o utilizador: {erro}")
+            # vai ser excutado mesmo que o try dê erro ou não
+            finally:
+                #primeiro ele vai fechar a ligação com a base de dados
+                # vai verificar se já tem algum valor, caso tenham fecha
+                if cursor is not None:
+                    cursor.close()
+                if conexao is not None:
+                    conexao.close() 
 
 
 """Classe Tarefa"""
 
 class Tarefa:
+    #construtor
     def __init__(self, id, descricao, estado, data_inicio, data_fim):
         self.id = id
         self.descricao = descricao
 
+        # vai verificar se o estado esta com uma destas opções      
         if estado in ['aberto', 'pendente', 'fechado']:
-            self.estado = estado
-    
+            self.estado = estado # atribui o estado se for entre aquelas opções
+        # se não mandar um estado das que foram atribuidas manda uma mensagem de erro e deixa estado em aberto automaticamente
         else:
             print("Estado inválido, por favor insira de novo.")
             self.estado = "aberto"
-
-        self.data_inicio = data_inicio
-        self.data_fim = data_fim
-
+        
+        self.data_inicio = data_inicio # data de inicio da tarefa 
+        self.data_fim = data_fim # data de fim 
+    # método para guardar as tarefas na base de dados 
     def guardar_baseDados(self):
+        #comando sql para inserir na tabela t_tarefas 
         sql = """
             INSERT INTO tarefas (descricao, estado, data_inicio, data_fim)
             VALUES (%s, %s, %s, %s)
         """
+        # os %s vão ser mudados pelos valores que forem inseridos 
         valores = (self.descricao, self.estado, self.data_inicio, self.data_fim)
-        myscursor.execute(sql, valores)
-        mydb.commit()
+        mycursor.execute(sql, valores) # executa o comando com os valores que são pretendidos 
+        mydb.commit() # confirma se dos dados realmente foram inseridos na tabela 
 
+    # método para alterar os dados da tarefa que já exista
     def alterar_dados(self, nova_descricao, novo_estado, nova_data_inicio, nova_data_fim):
+        # verifica se o novo estado é válido 
         if novo_estado in ['aberto','pendente','fechado']:
+            # comando sql 
             sql = """
                 UPDATE tarefas
                 SET descricao = %s, estado = %s, data_inicio = %s, data_fim = %s
                 WHERE id = %s
             """
+            # valores que vão ser substituidos pelos %s no comando sql, incluindo o id da tarefa  para identificar qual será atualizada  
             valores = (nova_descricao, novo_estado, nova_data_inicio, nova_data_fim, self.id)
-            myscursor.execute(sql, valores)
-            mydb.commit()
+            mycursor.execute(sql, valores) # executa o comando com os valores que são pretendidos 
+            mydb.commit() # confirma se dos dados realmente foram inseridos na tabela 
 
+            # atualiza os atributos do objeto com os novos valores 
             self.descricao = nova_descricao
             self.estado = novo_estado
             self.data_inicio = nova_data_inicio
             self.data_fim = nova_data_fim
-
+            # se der certo manda uma mensagem a confirmar a atualização 
             print("Dados alterados com sucesso")
         else: 
+            # caso não tenha dado certo manda uma mensagem de erro 
             print("Estado inválido. Alteração cancelada.")
-            return
-
-
-# Criar uma tarefa válida
-t1 = Tarefa(
-    id=None,  # id pode ser None se for autogerado pelo banco
-    descricao="Concluir relatório mensal",
-    estado="aberto",
-    data_inicio=date(2025, 6, 17),
-    data_fim=date(2025, 6, 20)
-)
-
-# Guardar na base de dados
-t1.guardar_baseDados()
-print("Tarefa guardada.")
-
-
-
-
-
+            return # vai sair da função sem as alterações
 """Classe Grupo"""
 
 class Grupo:
