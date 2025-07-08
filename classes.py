@@ -1,8 +1,8 @@
-import mysql.connector
-from mysql.connector import Error # o error server para apanhar os erros específicos da base de dados
+import pymysql
 from datetime import date 
+from fpdf import FPDF
 
-mydb = mysql.connector.connect(
+mydb = pymysql.connect(
     host = "localhost",
     user = "root",
     password = "",
@@ -173,29 +173,47 @@ class Grupo:
 
 
 """Classe Reuniao"""
-#construtor da classe recebe uma string, que vai ser a função que retorna o nome do admin, membros e topicos falados
-#função para gerar o txt com o relatorio da reuniao
 class Reuniao:
     def __init__(self, dataDaReuniao, teamLeader, membros, topicosFalados):
         self.dataDaReuniao = dataDaReuniao
         self.teamLeader = teamLeader
         self.membros = membros
         self.topicosFalados = topicosFalados
-    
-    def imprimirMembros(self):
-        for i in self.membros:
-            print(i)
- 
 
-#objetos da classe utilizador
-usuario1 = Utilizador("Pietro" , "Noite")
-usuario2 = Utilizador("Tiago" , "Noite")
+'''Classe para gerar o relatorio usando a biblioteca FPDF'''
+class RelatorioReuniaoPDF(FPDF):
+        
+    def header(self):
+        self.set_font('Arial', 'B', 14)
+        self.cell(0, 10, 'Relatório da Reunião', ln=True, align='C')
+        self.ln(10)
 
-#Lista de membros teste
-testeMembros = [usuario1.nome , usuario2.nome] 
-print(testeMembros)
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', align='C')
 
+    def adicionar_dados_reuniao(self, reuniao: Reuniao):
+        self.set_font('Arial', '', 12)
+        
+        self.cell(0, 10, f"Data da Reunião: {reuniao.dataDaReuniao}", ln=True)
+        self.cell(0, 10, f"Team Leader: {reuniao.teamLeader}", ln=True)
 
+        self.ln(5)
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, "Membros Presentes:", ln=True)
+        self.set_font('Arial', '', 12)
+        for membro in reuniao.membros:
+            self.cell(0, 10, f"- {membro}", ln=True)
+
+        self.ln(5)
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, "Tópicos Falados:", ln=True)
+        self.set_font('Arial', '', 12)
+        for topico in reuniao.topicosFalados:
+            self.multi_cell(0, 10, f"- {topico}")
+        
+        self.ln(5)
 
 class Admin:
     def __init__(self, nome):
