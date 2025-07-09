@@ -218,19 +218,20 @@ class RelatorioReuniaoPDF(FPDF):
 class Admin:
     def __init__(self, nome):
         self.nome = nome
-        self.usuarios = {}  
+        self.usuarios = {}  # chave: usuario_id, valor: Usuario
         self.configuracoes = {}
+        self.reunioes = []
 
     def criar_usuario(self, usuario_id, nome_usuario):
         if usuario_id in self.usuarios:
             print("Usuário já existe.")
         else:
-            self.usuarios[usuario_id] = nome_usuario
+            self.usuarios[usuario_id] = Usuario(usuario_id, nome_usuario)
             print(f"Usuário '{nome_usuario}' criado com sucesso.")
 
     def remover_usuario(self, usuario_id):
         if usuario_id in self.usuarios:
-            nome = self.usuarios.pop(usuario_id)
+            nome = self.usuarios.pop(usuario_id).nome
             print(f"Usuário '{nome}' removido.")
         else:
             print("Usuário não encontrado.")
@@ -240,8 +241,8 @@ class Admin:
             print("Nenhum usuário cadastrado.")
         else:
             print("Lista de usuários:")
-            for uid, nome in self.usuarios.items():
-                print(f"ID: {uid}, Nome: {nome}")
+            for usuario in self.usuarios.values():
+                print(usuario)
 
     def alterar_configuracao(self, chave, valor):
         self.configuracoes[chave] = valor
@@ -257,5 +258,58 @@ class Admin:
 
     def gerar_relatorio_usuarios(self):
         print(f"Relatório de usuários ({len(self.usuarios)} total):")
-        for uid, nome in self.usuarios.items():
-            print(f"ID: {uid}, Nome: {nome}")
+        for usuario in self.usuarios.values():
+            print(usuario)
+
+    def adicionar_tarefa_usuario(self, usuario_id, tarefa):
+        usuario = self.usuarios.get(usuario_id)
+        if usuario:
+            usuario.adicionar_tarefa(tarefa)
+            print(f"Tarefa adicionada ao usuário {usuario.nome}.")
+        else:
+            print("Usuário não encontrado.")
+
+    def criar_reuniao(self, descricao):
+        self.reunioes.append(descricao)
+        print(f"Reunião criada: {descricao}")
+
+    def ver_reunioes(self):
+        if not self.reunioes:
+            print("Nenhuma reunião marcada.")
+        else:
+            print("Reuniões:")
+            for r in self.reunioes:
+                print(f"- {r}")
+
+    def definir_turno_usuario(self, usuario_id, turno):
+        usuario = self.usuarios.get(usuario_id)
+        if usuario:
+            usuario.definir_turno(turno)
+            print(f"Turno definido para {usuario.nome}.")
+        else:
+            print("Usuário não encontrado.")
+
+    def alterar_descricao_grupo(self, usuario_id, descricao):
+        usuario = self.usuarios.get(usuario_id)
+        if usuario:
+            usuario.definir_descricao_grupo(descricao)
+            print(f"Descrição do grupo atualizada para o usuário {usuario.nome}.")
+        else:
+            print("Usuário não encontrado.")
+
+    def ver_descricao_grupo_usuario(self, usuario_id):
+        usuario = self.usuarios.get(usuario_id)
+        if usuario:
+            print(f"Descrição do grupo de {usuario.nome}: {usuario.descricao_grupo}")
+        else:
+            print("Usuário não encontrado.")
+
+    def definir_portavoz(self, usuario_id):
+        for uid, usuario in self.usuarios.items():
+            usuario.portavoz = False  # Remove qualquer porta-voz anterior
+        if usuario_id in self.usuarios:
+            self.usuarios[usuario_id].portavoz = True
+            print(f"{self.usuarios[usuario_id].nome} agora é o porta-voz do grupo.")
+        else:
+            print("Usuário não encontrado.")
+
